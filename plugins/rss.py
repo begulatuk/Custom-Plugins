@@ -194,7 +194,7 @@ async def list_rss_feed(msg: Message):
 async def rss_worker():
     global TASK_RUNNING  # pylint: disable=global-statement
     TASK_RUNNING = True
-    chunk = 20
+    chunk = 5
     if RSS_DICT and RSS_CHAT_ID[0] == Config.LOG_CHANNEL_ID:
         _LOG.info(
             "You have to add var for `RSS_CHAT_ID`, for Now i will send in LOG_CHANNEL")
