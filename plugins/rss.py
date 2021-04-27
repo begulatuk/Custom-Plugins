@@ -91,14 +91,14 @@ async def send_new_post(entries):
     if entries.get('authors'):
         author = entries.get('authors')[0]['name'].split('/')[-1]
         author_link = entries.get('authors')[0]['href']
-    out_str = f"""
-**New post Found**
+    out_str = f"/leech `{link}`"
+#**New post Found**
 
-**Title:** `{title}`
-**Author:** [{author}]({author_link})
-**Last Updated:** `{time}`
-"""
-    markup = InlineKeyboardMarkup([[InlineKeyboardButton(text="View Post Online", url=link)]])
+#**Title:** `{title}`
+#**Author:** [{author}]({author_link})
+#**Last Updated:** `{time}`
+#"""
+#    markup = InlineKeyboardMarkup([[InlineKeyboardButton(text="View Post Online", url=link)]])
     if thumb:
         args = {
             'caption': out_str,
@@ -114,9 +114,10 @@ async def send_new_post(entries):
         }
     for chat_id in RSS_CHAT_ID:
         args.update({'chat_id': chat_id})
+        _LOG.info(args)                             
         try:
             if "720p.HEVC" in link or "GalaXXXy" in link:
-                _LOG.info("caption")                
+                _LOG.info(link)                
                 await asyncio.sleep(5)                                                        
                 await send_rss_to_telegram(userge.bot, args, thumb)
         except (
@@ -124,10 +125,10 @@ async def send_new_post(entries):
             UserNotParticipant, UsergeBotNotFound
         ):
             out_str = f"/leech `{link}`"
-            if 'caption' in args:
-                args.update({'caption': out_str})
-            else:
-                args.update({'text': out_str})
+            #if 'caption' in args:
+            #    args.update({'caption': out_str})
+            #else:
+            args.update({'text': out_str})
             await send_rss_to_telegram(userge, args, thumb)
 
 
