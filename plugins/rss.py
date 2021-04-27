@@ -194,7 +194,7 @@ async def list_rss_feed(msg: Message):
 async def rss_worker():
     global TASK_RUNNING  # pylint: disable=global-statement
     TASK_RUNNING = True
-    chunk = 30
+    chunk = 20
     if RSS_DICT and RSS_CHAT_ID[0] == Config.LOG_CHANNEL_ID:
         _LOG.info(
             "You have to add var for `RSS_CHAT_ID`, for Now i will send in LOG_CHANNEL")
@@ -222,7 +222,7 @@ async def rss_worker():
 
 
 def _parse_time(t: str) -> Tuple[datetime, datetime]:
-    _delta = timedelta(hours=1, minutes=10)
+    _delta = timedelta(minutes=10)
     parsed_time = (parser.parse(t) + _delta).replace(tzinfo=None)
     datetime_now = datetime.utcnow() + _delta
     return parsed_time, datetime_now
