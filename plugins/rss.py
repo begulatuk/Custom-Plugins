@@ -92,43 +92,31 @@ async def send_new_post(entries):
         author = entries.get('authors')[0]['name'].split('/')[-1]
         author_link = entries.get('authors')[0]['href']
     out_str = f"/leech `{link}`"
-#**New post Found**
-
-#**Title:** `{title}`
-#**Author:** [{author}]({author_link})
-#**Last Updated:** `{time}`
-#"""
-#    markup = InlineKeyboardMarkup([[InlineKeyboardButton(text="View Post Online", url=link)]])
-    if thumb:
-        args = {
-            'caption': out_str,
-            'parse_mode': "md",
-            'reply_markup': markup if userge.has_bot else None
-        }
-    else:
-        args = {
-            'text': out_str,
-            'disable_web_page_preview': True,
-            'parse_mode': "md",
-            'reply_markup': markup if userge.has_bot else None
-        }
+                                 
+    markup = InlineKeyboardMarkup([[InlineKeyboardButton(text="View Post Online", url=link)]])
+    args = {
+        'text': out_str,
+        'disable_web_page_preview': True,
+        'parse_mode': "md",
+        'reply_markup': None
+    }
+                             
     for chat_id in RSS_CHAT_ID:
         args.update({'chat_id': chat_id})
-        _LOG.info(args)                             
+        _LOG.info(f"UPDATED: {link}")                             
         try:
             if "720p.HEVC" in link or "GalaXXXy" in link:
-                _LOG.info(link)                
+                _LOG.info(f"SEND LINK: {link}")                
                 await asyncio.sleep(5)                                                        
                 await send_rss_to_telegram(userge.bot, args, thumb)
+            else:
+                _LOG.info(f"{link}: not our criteria")                                              
         except (
             ChatWriteForbidden, ChannelPrivate, ChatIdInvalid,
             UserNotParticipant, UsergeBotNotFound
         ):
             out_str = f"/leech `{link}`"
-            #if 'caption' in args:
-            #    args.update({'caption': out_str})
-            #else:
-            args.update({'text': out_str})
+
             await send_rss_to_telegram(userge, args, thumb)
 
 
