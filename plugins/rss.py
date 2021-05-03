@@ -103,7 +103,7 @@ async def send_new_post(entries):
                              
     for chat_id in RSS_CHAT_ID:
         args.update({'chat_id': chat_id})
-        _LOG.info(f"UPDATED: {link}")                             
+        #_LOG.info(f"UPDATED: {link}")                             
         try:
             if "720p.HEVC" in link or "GalaXXXy" in link:
                 _LOG.info(f"SEND LINK: {link}")                
@@ -207,7 +207,7 @@ async def rss_worker():
                 await asyncio.sleep(1)
             await asyncio.sleep(5)
         await asyncio.sleep(60)
-    TASK_RUNNING = False
+    TASK_RUNNING = True
 
 
 def _parse_time(t: str) -> Tuple[datetime, datetime]:
