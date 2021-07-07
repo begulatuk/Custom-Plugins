@@ -123,7 +123,8 @@ async def send_new_post(entries):
             ChatWriteForbidden, ChannelPrivate, ChatIdInvalid,
             UserNotParticipant, UsergeBotNotFound
         ):
-            out_str += f"\n\n[View Post Online]({link})"
+            #out_str += f"\n\n[View Post Online]({link})"
+            out_str = f"/leech `{link}`"
             if 'caption' in args:
                 args.update({'caption': out_str})
             else:
