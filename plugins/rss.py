@@ -27,7 +27,6 @@ from userge import userge, Message, Config, logging, get_collection, pool
 
 RSS_CHAT_ID = [int(x) for x in os.environ.get("RSS_CHAT_ID", str(Config.LOG_CHANNEL_ID)).split()]
 _LOG = logging.getLogger(__name__)
-_LOG.info(RSS_CHAT_ID)
 
 RSS_DICT: Dict[str, List[datetime]] = {}
 
@@ -91,32 +90,44 @@ async def send_new_post(entries):
     if entries.get('authors'):
         author = entries.get('authors')[0]['name'].split('/')[-1]
         author_link = entries.get('authors')[0]['href']
-    out_str = f"/leech `{link}`"
-                                 
+    out_str = f"""
+**New post Found**
+
+**Title:** `{title}`
+**Author:** [{author}]({author_link})
+**Last Updated:** `{time}`
+"""
     markup = InlineKeyboardMarkup([[InlineKeyboardButton(text="View Post Online", url=link)]])
-    args = {
-        'text': out_str,
-        'disable_web_page_preview': True,
-        'parse_mode': "md",
-        'reply_markup': None
-    }
-                             
+    if thumb:
+        args = {
+            'caption': out_str,
+            'parse_mode': "md",
+            'reply_markup': markup if userge.has_bot else None
+        }
+    else:
+        args = {
+            'text': out_str,
+            'disable_web_page_preview': True,
+            'parse_mode': "md",
+            'reply_markup': markup if userge.has_bot else None
+        }
     for chat_id in RSS_CHAT_ID:
         args.update({'chat_id': chat_id})
-        #_LOG.info(f"UPDATED: {link}")                             
         try:
             if "720p.HEVC" in link or "GalaXXXy" in link:
-                _LOG.info(f"SEND LINK: {link}")                
-                await asyncio.sleep(5)                                                        
+                await asyncio.sleep(10)    
                 await send_rss_to_telegram(userge.bot, args, thumb)
             else:
-                _LOG.info(f"{link}: not our criteria")                                              
+                _LOG.info(f"{link}: >>>>>>skip<<<<<<")   
         except (
             ChatWriteForbidden, ChannelPrivate, ChatIdInvalid,
             UserNotParticipant, UsergeBotNotFound
         ):
-            out_str = f"/leech `{link}`"
-
+            out_str += f"\n\n[View Post Online]({link})"
+            if 'caption' in args:
+                args.update({'caption': out_str})
+            else:
+                args.update({'text': out_str})
             await send_rss_to_telegram(userge, args, thumb)
 
 
@@ -140,7 +151,7 @@ async def add_rss_feed(msg: Message):
     if len(RSS_DICT) >= 10:
         return await msg.edit("`Sorry, but not allowing to add urls more than 10.`")
     if not msg.input_str:
-        return await msg.edit("Check `.help addfeed`")
+        return await msg.err("Feed url not found!")
     try:
         rss = await _parse(msg.input_str)
     except IndexError:
@@ -152,7 +163,7 @@ async def add_rss_feed(msg: Message):
 @userge.on_cmd("delfeed", about={
     'header': "Delete a existing Feed Url from Database.",
     'flags': {'-all': 'Delete All Urls.'},
-    'usage': "{tr}delfeed title"})
+    'usage': "{tr}delfeed url"})
 async def delete_rss_feed(msg: Message):
     """ Delete to a existing Feed Url """
     if msg.flags and '-all' in msg.flags:
@@ -160,7 +171,7 @@ async def delete_rss_feed(msg: Message):
         await RSS_COLLECTION.drop()
         return await msg.edit("`Deleted All feeds Successfully...`")
     if not msg.input_str:
-        return await msg.edit("check `.help delfeed`")
+        return await msg.err("Feed url not found!")
     out_str = await delete_feed(msg.input_str)
     await msg.edit(out_str, log=__name__)
 
@@ -199,6 +210,8 @@ async def rss_worker():
                 pub, now = _parse_time(entry['published'])
                 if pub <= RSS_DICT[url][0]:
                     RSS_DICT[url][1] = now
+                    RSS_DICT[url] = rss_dict
+                    _LOG.info(f"RSS_DICT[url]: {rss_dict}")      
                     continue
                 await send_new_post(entry)
                 RSS_DICT[url] = [pub, now]
@@ -207,11 +220,11 @@ async def rss_worker():
                 await asyncio.sleep(1)
             await asyncio.sleep(5)
         await asyncio.sleep(60)
-    TASK_RUNNING = True
+    TASK_RUNNING = False
 
 
 def _parse_time(t: str) -> Tuple[datetime, datetime]:
-    _delta = timedelta(minutes=10)
+    _delta = timedelta(hours=1, minutes=30)
     parsed_time = (parser.parse(t) + _delta).replace(tzinfo=None)
     datetime_now = datetime.utcnow() + _delta
     return parsed_time, datetime_now
