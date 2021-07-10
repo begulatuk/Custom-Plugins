@@ -221,11 +221,11 @@ async def rss_worker():
                 await asyncio.sleep(1)
             await asyncio.sleep(5)
         await asyncio.sleep(60)
-    TASK_RUNNING = False
+    TASK_RUNNING = True
 
 
 def _parse_time(t: str) -> Tuple[datetime, datetime]:
-    _delta = timedelta(hours=1, minutes=30)
+    _delta = timedelta(hours=5, minutes=30)
     parsed_time = (parser.parse(t) + _delta).replace(tzinfo=None)
     datetime_now = datetime.utcnow() + _delta
     return parsed_time, datetime_now
